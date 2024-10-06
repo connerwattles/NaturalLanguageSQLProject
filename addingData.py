@@ -1,6 +1,7 @@
 import psycopg2
+import os
 
-CONNECTION_STRING = "postgres://tsdbadmin:byuPassword123@qbam0sz08b.sxf6w90jzu.tsdb.cloud.timescale.com:36743/tsdb?sslmode=require"
+CONNECTION_STRING = os.getenv('DB_CONNECTION_STRING')
 
 def insert_sample_data():
     sample_data = [
