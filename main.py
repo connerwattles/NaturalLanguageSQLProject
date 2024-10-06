@@ -38,11 +38,10 @@ def generate_response(results):
 def main():
     questions = input("Enter your questions, separated by commas: ").split(',')
     for question in questions:
-        question = question.strip()  # remove leading/trailing whitespace
+        question = question.strip()
         sql_query = get_sql_query(question)
         results = run_query(sql_query)
         if "Error" in results:
             print(f"Failed to execute query for question '{question}': {results}")
         else:
             print(f"Results for question '{question}': {generate_response(results)}")
-            
