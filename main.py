@@ -21,7 +21,7 @@ def run_query(query: str):
 
 def get_sql_query(question: str) -> str:
     completion = client.chat.completions.create(
-        model="gpt-4o-mini",
+        model="gpt-4o",
         messages=[
             {"role": "system", "content": "You are a helpful assistant proficient in PostgreSQL and TimescaleDB."},
             {
@@ -30,14 +30,64 @@ def get_sql_query(question: str) -> str:
                 
                 The tables in the database are as follows:
                 
-                1. **User**: Columns - `gender` (Enum: 'Male' or 'Female'), `age` (Number).
-                2. **Program**: Columns - `selectedWorkoutDaysPerWeek` (Number), `experienceLevel` (Enum: 'Beginner', 'Intermediate', 'Advanced'), `selectedGoals` (Array of goal values as enum strings), `selectedWorkoutTypes` (Array of workout types as enum strings), `selectedWorkoutDuration` (Number), `selectedDiet` (FK to Diet table), `selectedWeightUnit` (Enum: 'Kgs' or 'Lbs'), `selectedGymBusiness`, `selectedMuscleGroups` (Array of FK to MuscleGroup), `subscriptionStatus` (Boolean), `selectedDaysUntilNextWorkout` (Number), `selectedSoreMuscleGroups` (Array of FK to MuscleGroup).
-                3. **Schedule**: Columns - `workouts` (Array of FK to Workout).
-                4. **Workout**: Columns - `scheduledDate` (Date), `durationMinutes` (Number), `exercise_ids` (Array of FK to Exercise), constraints of 5-8 muscle groups.
-                5. **Exercise**: Columns - `name` (String), `requiredEquipment` (FK to Equipment.id, Integer), `repConstant` (Number), `weightConstant` (Number), `video` (String).
-                6. **Equipment**: Columns - `id` (Primary Key, Integer), `name` (String), `type` (Enum: 'BodyWeight', 'Dumbbells', 'Machine', 'Barbell').
-                7. **MuscleGroup**: Columns - `name` (String), `selectedBias` (Number), `region` (Enum: 'Upper Body', 'Lower Body'), `sizeConstant` (Number).
-                8. **Diet**: Columns - `type` (Enum: 'Cutting', 'Maintenance', 'Bulking'), `multiplierValue` (Number).
+                CREATE TABLE IF NOT EXISTS Users (
+                id SERIAL PRIMARY KEY,
+                gender VARCHAR(10) CHECK(gender IN ('Male', 'Female')),
+                age INT
+                );
+
+                CREATE TABLE IF NOT EXISTS MuscleGroup (
+                id SERIAL PRIMARY KEY,
+                name VARCHAR(50),
+                selectedBias NUMERIC,
+                region VARCHAR(20) CHECK(region IN ('Upper Body', 'Lower Body')),
+                sizeConstant NUMERIC
+                );
+
+                CREATE TABLE IF NOT EXISTS Diet (
+                id SERIAL PRIMARY KEY,
+                type VARCHAR(20) CHECK(type IN ('Cutting', 'Maintenance', 'Bulking')),
+                multiplierValue NUMERIC
+                );
+
+                CREATE TABLE IF NOT EXISTS Equipment (
+                id SERIAL PRIMARY KEY,
+                name VARCHAR(50),
+                type VARCHAR(20) CHECK(type IN ('BodyWeight', 'Dumbbells', 'Machine', 'Barbell'))
+                );
+
+                CREATE TABLE IF NOT EXISTS Exercise (
+                id SERIAL PRIMARY KEY,
+                name VARCHAR(50),
+                requiredEquipment INT REFERENCES Equipment(id),
+                repConstant NUMERIC,
+                weightConstant NUMERIC,
+                video VARCHAR(100)
+                );
+
+                CREATE TABLE IF NOT EXISTS Workout (
+                id SERIAL PRIMARY KEY,
+                scheduledDate DATE,
+                durationMinutes INT,
+                exercise_ids INT[]
+                );
+
+                CREATE TABLE IF NOT EXISTS Schedule (
+                id SERIAL PRIMARY KEY,
+                workouts INT[]
+                );
+
+                CREATE TABLE IF NOT EXISTS Program (
+                id SERIAL PRIMARY KEY,
+                selectedWorkoutDaysPerWeek INT,
+                experienceLevel VARCHAR(20) CHECK(experienceLevel IN ('Beginner', 'Intermediate', 'Advanced')),
+                selectedGoals VARCHAR(50)[],
+                selectedWorkoutTypes VARCHAR(50)[],
+                selectedWorkoutDuration INT,
+                selectedDiet INT REFERENCES Diet(id),
+                selectedWeightUnit VARCHAR(10) CHECK(selectedWeightUnit IN ('Kgs', 'Lbs')),
+                selectedDaysUntilNextWorkout INT
+                );
                 
                 The database also uses TimescaleDB extensions, so take advantage of Timescale-specific functionality when relevant, especially for time-based queries."""
             }
@@ -52,7 +102,7 @@ def get_sql_query(question: str) -> str:
 
 def generate_response(results):
     completion = client.chat.completions.create(
-    model="gpt-4o-mini",
+    model="gpt-4o",
     messages=[
         {"role": "system", "content": "You are a helpful assistant."},
         {
