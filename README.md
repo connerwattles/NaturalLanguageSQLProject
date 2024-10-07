@@ -33,7 +33,7 @@ Remember that this count is based on the information available at the time the q
 
 ## Schema
 
-![Mars DB_Models](https://github.com/user-attachments/assets/16999ad7-37a6-44a7-81a6-8ae9796acc43)
+![Natural Language Project](https://github.com/user-attachments/assets/0dd72960-a277-44a0-96d5-3518a718f04d)
 
 ## Question that it tripped up on
 
